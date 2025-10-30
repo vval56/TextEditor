@@ -2,7 +2,7 @@
 #define THEMEMANAGER_H
 
 #include "theme.h"
-#include "myvector.h"  // Наш собственный контейнер
+#include "myvector.h" 
 #include <memory>
 #include <unordered_map>
 #include <stdexcept>
@@ -11,16 +11,13 @@ class ThemeManager {
 public:
     ThemeManager();
     
-    // Запрещаем копирование и присваивание
     ThemeManager(const ThemeManager&) = delete;
     ThemeManager& operator=(const ThemeManager&) = delete;
     
-    // Получение экземпляра (Singleton)
     static ThemeManager& getInstance();
     
-    // Работа с темами - используем наш MyVector вместо std::vector
     void registerTheme(std::unique_ptr<ITheme> theme);
-    MyVector<QString> getAvailableThemes() const;  // Изменили на MyVector
+    MyVector<QString> getAvailableThemes() const; 
     ITheme* getTheme(const QString& name) const;
     void setCurrentTheme(const QString& name);
     ITheme* getCurrentTheme() const;
@@ -32,7 +29,6 @@ private:
     void initializeDefaultThemes();
 };
 
-// Исключения
 class ThemeException : public std::runtime_error {
 public:
     explicit ThemeException(const std::string& message) 

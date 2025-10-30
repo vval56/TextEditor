@@ -15,7 +15,6 @@ void ThemeManager::initializeDefaultThemes() {
     registerTheme(std::make_unique<DarkTheme>());
     registerTheme(std::make_unique<BlueTheme>());
     
-    // Устанавливаем светлую тему по умолчанию
     setCurrentTheme("Light");
 }
 
@@ -28,7 +27,6 @@ void ThemeManager::registerTheme(std::unique_ptr<ITheme> theme) {
     themes_.emplace(name, std::move(theme));
 }
 
-// Используем наш MyVector вместо std::vector
 MyVector<QString> ThemeManager::getAvailableThemes() const {
     MyVector<QString> themeNames;
     for (const auto& pair : themes_) {

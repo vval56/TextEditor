@@ -14,7 +14,7 @@ private:
     size_t capacity_;
 
     void reallocate(size_t new_capacity) {
-        T* new_data = new T[new_capacity];
+        auto new_data = new T[new_capacity];
         
         for (size_t i = 0; i < size_; ++i) {
             new_data[i] = std::move(data_[i]);
@@ -26,7 +26,6 @@ private:
     }
 
 public:
-    // Итератор
     class Iterator {
     private:
         T* ptr_;
@@ -48,11 +47,9 @@ public:
             return temp;
         }
         
-        bool operator==(const Iterator& other) const { return ptr_ == other.ptr_; }
-        bool operator!=(const Iterator& other) const { return ptr_ != other.ptr_; }
+        bool operator==(const Iterator& other) const = default;
     };
 
-    // Конструкторы
     MyVector() : data_(nullptr), size_(0), capacity_(0) {}
     
     explicit MyVector(size_t count, const T& value = T()) 
@@ -70,7 +67,6 @@ public:
         }
     }
     
-    // Конструктор копирования
     MyVector(const MyVector& other) 
         : data_(new T[other.capacity_]), size_(other.size_), capacity_(other.capacity_) {
         for (size_t i = 0; i < size_; ++i) {
@@ -78,7 +74,6 @@ public:
         }
     }
     
-    // Конструктор перемещения
     MyVector(MyVector&& other) noexcept 
         : data_(other.data_), size_(other.size_), capacity_(other.capacity_) {
         other.data_ = nullptr;
@@ -86,7 +81,6 @@ public:
         other.capacity_ = 0;
     }
     
-    // Оператор присваивания копированием
     MyVector& operator=(const MyVector& other) {
         if (this != &other) {
             delete[] data_;
@@ -102,7 +96,6 @@ public:
         return *this;
     }
     
-    // Оператор присваивания перемещением
     MyVector& operator=(MyVector&& other) noexcept {
         if (this != &other) {
             delete[] data_;
@@ -118,12 +111,10 @@ public:
         return *this;
     }
     
-    // Деструктор
     ~MyVector() {
         delete[] data_;
     }
     
-    // Доступ к элементам
     T& operator[](size_t index) {
         if (index >= size_) {
             throw std::out_of_range("Index out of range");
@@ -183,11 +174,9 @@ public:
     T* data() noexcept { return data_; }
     const T* data() const noexcept { return data_; }
     
-    // Итераторы
     Iterator begin() noexcept { return Iterator(data_); }
     Iterator end() noexcept { return Iterator(data_ + size_); }
     
-    // Вместимость
     bool empty() const noexcept { return size_ == 0; }
     size_t size() const noexcept { return size_; }
     size_t capacity() const noexcept { return capacity_; }
@@ -204,7 +193,6 @@ public:
         }
     }
     
-    // Модификаторы
     void clear() noexcept {
         size_ = 0;
     }
@@ -250,18 +238,15 @@ public:
         size_ = count;
     }
     
-    // Обмен
     void swap(MyVector& other) noexcept {
         std::swap(data_, other.data_);
         std::swap(size_, other.size_);
         std::swap(capacity_, other.capacity_);
     }
     
-    // Вывод для отладки
     void print() const {
         std::cout << "[";
         for (size_t i = 0; i < size_; ++i) {
-            // Для QString преобразуем в std::string
             if constexpr (std::is_same_v<T, QString>) {
                 std::cout << data_[i].toStdString();
             } else {

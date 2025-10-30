@@ -6,7 +6,6 @@
 #include <memory>
 #include <vector>
 
-// Абстрактный класс для инструментов редактирования
 class IEditTool {
 public:
     virtual ~IEditTool() = default;
@@ -15,7 +14,6 @@ public:
     virtual bool canExecute(QTextEdit* textEdit) const = 0;
 };
 
-// Конкретные инструменты
 class UpperCaseTool : public IEditTool {
 public:
     QString getName() const override { return "To Upper Case"; }
@@ -44,7 +42,6 @@ public:
     bool canExecute(QTextEdit* textEdit) const override { return true; }
 };
 
-// Менеджер инструментов
 class EditToolManager {
 public:
     EditToolManager();

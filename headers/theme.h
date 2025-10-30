@@ -5,7 +5,6 @@
 #include <QColor>
 #include <map>
 
-// Абстрактный класс для тем
 class ITheme {
 public:
     virtual ~ITheme() = default;
@@ -16,10 +15,9 @@ public:
     virtual QString getStylesheet() const = 0;
 };
 
-// Конкретные реализации тем
 class LightTheme : public ITheme {
 public:
-    LightTheme() = default; // Добавляем конструктор
+    LightTheme() = default; 
     QString getName() const override;
     QColor getBackgroundColor() const override;
     QColor getTextColor() const override;
@@ -29,7 +27,7 @@ public:
 
 class DarkTheme : public ITheme {
 public:
-    DarkTheme() = default; // Добавляем конструктор
+    DarkTheme() = default; 
     QString getName() const override;
     QColor getBackgroundColor() const override;
     QColor getTextColor() const override;
@@ -39,7 +37,7 @@ public:
 
 class BlueTheme : public ITheme {
 public:
-    BlueTheme() = default; // Добавляем конструктор
+    BlueTheme() = default; 
     QString getName() const override;
     QColor getBackgroundColor() const override;
     QColor getTextColor() const override;

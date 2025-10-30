@@ -15,14 +15,14 @@
 #include <memory>
 #include "theme.h"
 #include "thememanager.h"
-#include "edittols.h"
+#include "edittools.h"
 
 class TextEditor : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    TextEditor(QWidget *parent = nullptr);
+    explicit TextEditor(QWidget *parent = nullptr);
     ~TextEditor();
 
 private slots:
@@ -44,19 +44,17 @@ private:
     void applyTheme();
     void setupEditTools();
 
-    void handleFileOperation(const std::function<void()>& operation, const QString& errorMessage);
+    template<typename Func>
+    void handleFileOperation(Func&& operation, const QString& errorMessage);
 
-    // Основные компоненты
     QTextEdit *textEdit;
 
-    // Меню
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *viewMenu;
     QMenu *toolsMenu;
     QMenu *helpMenu;
 
-    // Действия
     QAction *newAct;
     QAction *openAct;
     QAction *saveAct;
@@ -67,17 +65,14 @@ private:
     QAction *pasteAct;
     QAction *aboutAct;
 
-    // Панели инструментов
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
 
-    // Статус бар
     QLabel *statusLabel;
     QLabel *themeLabel;
     QComboBox *themeComboBox;
     QComboBox *toolsComboBox;
 
-    // Менеджеры - используем указатель
     ThemeManager* themeManager_;
     std::unique_ptr<EditToolManager> editToolManager_;
 

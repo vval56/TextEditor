@@ -3,7 +3,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <stdexcept>
-#include "../headers/myvector.h"  // Наш собственный контейнер
+#include "../headers/myvector.h" 
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent),
@@ -76,7 +76,6 @@ void TextEditor::createActions()
 
 void TextEditor::createMenus()
 {
-    // Меню Файл
     fileMenu = menuBar()->addMenu("Файл");
     fileMenu->addAction(newAct);
     fileMenu->addAction(openAct);
@@ -85,32 +84,26 @@ void TextEditor::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
-    // Меню Правка
     editMenu = menuBar()->addMenu("Правка");
     editMenu->addAction(cutAct);
     editMenu->addAction(copyAct);
     editMenu->addAction(pasteAct);
 
-    // Меню Вид
     viewMenu = menuBar()->addMenu("Вид");
 
-    // Меню Инструменты
     toolsMenu = menuBar()->addMenu("Инструменты");
 
-    // Меню Справка
     helpMenu = menuBar()->addMenu("Справка");
     helpMenu->addAction(aboutAct);
 }
 
 void TextEditor::createToolBars()
 {
-    // Панель инструментов Файл
     fileToolBar = addToolBar("Файл");
     fileToolBar->addAction(newAct);
     fileToolBar->addAction(openAct);
     fileToolBar->addAction(saveAct);
 
-    // Панель инструментов Правка
     editToolBar = addToolBar("Правка");
     editToolBar->addAction(cutAct);
     editToolBar->addAction(copyAct);
@@ -127,22 +120,14 @@ void TextEditor::createStatusBar()
     
     themeComboBox = new QComboBox();
     
-    // Используем наш MyVector
     MyVector<QString> themes = themeManager_->getAvailableThemes();
     
-    // Демонстрация работы с нашим контейнером
     std::cout << "Available themes (" << themes.size() << "): ";
-    themes.print();  // Используем наш метод print()
+    themes.print();
     
-    // Используем итераторы нашего контейнера
     for (auto it = themes.begin(); it != themes.end(); ++it) {
         themeComboBox->addItem(*it);
     }
-    
-    // Или через range-based for (тоже работает!)
-    // for (const QString& theme : themes) {
-    //     themeComboBox->addItem(theme);
-    // }
     
     themeComboBox->setCurrentText(themeManager_->getCurrentTheme()->getName());
     statusBar()->addWidget(themeComboBox);
@@ -163,7 +148,7 @@ void TextEditor::setupEditTools()
 void TextEditor::applyTheme()
 {
     try {
-        ITheme* theme = themeManager_->getCurrentTheme(); // Используем ->
+        ITheme* theme = themeManager_->getCurrentTheme();
         setStyleSheet(theme->getStylesheet());
         updateStatusBar();
     } catch (const ThemeException& e) {
@@ -171,10 +156,11 @@ void TextEditor::applyTheme()
     }
 }
 
-void TextEditor::handleFileOperation(const std::function<void()>& operation, const QString& errorMessage)
+template<typename Func>
+void TextEditor::handleFileOperation(Func&& operation, const QString& errorMessage)
 {
     try {
-        operation();
+        std::forward<Func>(operation)();
     } catch (const std::exception& e) {
         QMessageBox::critical(this, "Ошибка", errorMessage + ": " + e.what());
     }

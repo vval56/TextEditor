@@ -1,9 +1,8 @@
-#include "../headers/edittols.h"
+#include "../headers/edittools.h"
 #include <QTextCursor>
 #include <QMessageBox>
 #include <QRegularExpression>
 
-// UpperCaseTool
 void UpperCaseTool::execute(QTextEdit* textEdit) {
     QString selectedText = textEdit->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
@@ -15,7 +14,6 @@ bool UpperCaseTool::canExecute(QTextEdit* textEdit) const {
     return !textEdit->textCursor().selectedText().isEmpty();
 }
 
-// LowerCaseTool
 void LowerCaseTool::execute(QTextEdit* textEdit) {
     QString selectedText = textEdit->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
@@ -27,14 +25,12 @@ bool LowerCaseTool::canExecute(QTextEdit* textEdit) const {
     return !textEdit->textCursor().selectedText().isEmpty();
 }
 
-// WordCountTool
 void WordCountTool::execute(QTextEdit* textEdit) {
     QString text = textEdit->toPlainText();
     int wordCount = 0;
     int charCount = text.length();
     int lineCount = text.count('\n') + 1;
 
-    // Используем QRegularExpression вместо QRegExp
     QStringList words = text.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
     wordCount = words.size();
 
@@ -43,7 +39,6 @@ void WordCountTool::execute(QTextEdit* textEdit) {
                                  .arg(wordCount).arg(charCount).arg(lineCount));
 }
 
-// DuplicateLineTool
 void DuplicateLineTool::execute(QTextEdit* textEdit) {
     QTextCursor cursor = textEdit->textCursor();
     cursor.select(QTextCursor::LineUnderCursor);
@@ -53,7 +48,6 @@ void DuplicateLineTool::execute(QTextEdit* textEdit) {
     cursor.insertText("\n" + lineText);
 }
 
-// EditToolManager
 EditToolManager::EditToolManager() {
     registerTool(std::make_unique<UpperCaseTool>());
     registerTool(std::make_unique<LowerCaseTool>());

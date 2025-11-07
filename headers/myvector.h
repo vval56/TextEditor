@@ -47,7 +47,8 @@ public:
             return temp;
         }
         
-        bool operator==(const Iterator& other) const = default;
+        bool operator==(const Iterator& other) const { return ptr_ == other.ptr_; }
+        bool operator!=(const Iterator& other) const { return ptr_ != other.ptr_; }
     };
 
     MyVector() : data_(nullptr), size_(0), capacity_(0) {}

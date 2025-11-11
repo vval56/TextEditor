@@ -1,5 +1,4 @@
 #include "../headers/texteditor.h"
-#include <QTextStream>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QColorDialog>
@@ -601,30 +600,29 @@ void TextEditor::newFile()
         setWindowTitle("Текстовый редактор - Новый файл");
         statusLabel->setText("Новый файл создан");
         stopAutoSave();
+        documentManager_.context() = DocumentContext{};
     }, "Ошибка при создании файла");
 }
 
 void TextEditor::openFile()
 {
     handleFileOperation([this]() {
-        QString fileName = QFileDialog::getOpenFileName(this, "Открыть файл", "",
-                                                        "Текстовые файлы (*.txt);;Все файлы (*)");
+        QString fileName = QFileDialog::getOpenFileName(this,
+                                                        "Открыть файл",
+                                                        QString(),
+                                                        documentManager_.filterForOpenDialog());
 
         if (!fileName.isEmpty()) {
-            QFile file(fileName);
-            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QTextStream in(&file);
-                textEdit->setPlainText(in.readAll());
-                file.close();
-
-                currentFile = fileName;
-                setWindowTitle("Текстовый редактор - " + QFileInfo(fileName).fileName());
-                statusLabel->setText("Файл открыт: " + fileName);
-                textEdit->document()->setModified(false);
-                startAutoSaveIfNeeded();
-            } else {
-                throw std::runtime_error("Не удалось открыть файл для чтения");
+            QString error;
+            if (!documentManager_.loadDocument(fileName, textEdit->document(), error)) {
+                throw std::runtime_error(error.toStdString());
             }
+
+            currentFile = fileName;
+            setWindowTitle("Текстовый редактор - " + QFileInfo(fileName).fileName());
+            statusLabel->setText("Файл открыт: " + fileName);
+            textEdit->document()->setModified(false);
+            startAutoSaveIfNeeded();
         }
     }, "Ошибка при открытии файла");
 }
@@ -635,17 +633,13 @@ void TextEditor::saveFile()
         if (currentFile.isEmpty()) {
             saveAsFile();
         } else {
-            QFile file(currentFile);
-            if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QTextStream out(&file);
-                out << textEdit->toPlainText();
-                file.close();
-
-                textEdit->document()->setModified(false);
-                statusLabel->setText("Файл сохранен: " + currentFile);
-            } else {
-                throw std::runtime_error("Не удалось открыть файл для записи");
+            QString error;
+            if (!documentManager_.saveDocument(currentFile, textEdit->document(), error)) {
+                throw std::runtime_error(error.toStdString());
             }
+
+            textEdit->document()->setModified(false);
+            statusLabel->setText("Файл сохранен: " + currentFile);
         }
     }, "Ошибка при сохранении файла");
 }
@@ -653,13 +647,21 @@ void TextEditor::saveFile()
 void TextEditor::saveAsFile()
 {
     handleFileOperation([this]() {
-        QString fileName = QFileDialog::getSaveFileName(this, "Сохранить как", "",
-                                                        "Текстовые файлы (*.txt);;Все файлы (*)");
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        "Сохранить как",
+                                                        currentFile,
+                                                        documentManager_.filterForSaveDialog());
 
         if (!fileName.isEmpty()) {
+            QString error;
+            if (!documentManager_.saveDocument(fileName, textEdit->document(), error)) {
+                throw std::runtime_error(error.toStdString());
+            }
+
             currentFile = fileName;
-            saveFile();
+            textEdit->document()->setModified(false);
             setWindowTitle("Текстовый редактор - " + QFileInfo(fileName).fileName());
+            statusLabel->setText("Файл сохранен: " + currentFile);
             startAutoSaveIfNeeded();
         }
     }, "Ошибка при сохранении файла как");

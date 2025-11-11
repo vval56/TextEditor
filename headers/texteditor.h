@@ -24,6 +24,7 @@
 #include "thememanager.h"
 #include "edittools.h"
 #include "speechmanager.h"
+#include "documentmanager.h"
 
 class TextEditor : public QMainWindow
 {
@@ -150,6 +151,8 @@ private:
     // Автосохранение для открытых из файла документов
     QTimer *autoSaveTimer;
     bool autoSaveEnabled = false;
+
+    DocumentManager documentManager_;
 };
 
 #endif

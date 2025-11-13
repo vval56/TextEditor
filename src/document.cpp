@@ -2,6 +2,7 @@
 #include <QTextStream>
 #include <QFile>
 #include <QTextCursor>
+#include <QStringConverter>
 #include <QRegularExpression>
 
 Document::Document(QObject *parent)
@@ -28,7 +29,7 @@ bool Document::loadFromFile(const QString &fileName)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
+    in.setEncoding(QStringConverter::Utf8);
     setPlainText(in.readAll());
     file.close();
 
@@ -49,7 +50,7 @@ bool Document::saveToFile(const QString &fileName)
     }
 
     QTextStream out(&file);
-    out.setCodec("UTF-8");
+    out.setEncoding(QStringConverter::Utf8);
     out << toPlainText();
     file.close();
 
@@ -136,7 +137,7 @@ void Document::clear()
 // Методы форматирования
 void Document::applyFontFamily(const QString &family)
 {
-    QTextCursor cursor = textCursor();
+    QTextCursor cursor(this);
     if (!cursor.hasSelection()) {
         cursor.select(QTextCursor::WordUnderCursor);
     }
@@ -148,7 +149,7 @@ void Document::applyFontFamily(const QString &family)
 
 void Document::applyFontSize(int size)
 {
-    QTextCursor cursor = textCursor();
+    QTextCursor cursor(this);
     if (!cursor.hasSelection()) {
         cursor.select(QTextCursor::WordUnderCursor);
     }
@@ -160,7 +161,7 @@ void Document::applyFontSize(int size)
 
 void Document::applyBold(bool bold)
 {
-    QTextCursor cursor = textCursor();
+    QTextCursor cursor(this);
     if (!cursor.hasSelection()) {
         cursor.select(QTextCursor::WordUnderCursor);
     }
@@ -174,7 +175,7 @@ void Document::applyBold(bool bold)
 
 QString Document::getSelectedText() const
 {
-    QTextCursor cursor = const_cast<Document*>(this)->textCursor();
+    QTextCursor cursor(const_cast<Document*>(this));
     return cursor.selectedText();
 }
 
@@ -185,6 +186,6 @@ QString Document::getAllText() const
 
 void Document::insertTextAtCursor(const QString &text)
 {
-    QTextCursor cursor = textCursor();
+    QTextCursor cursor(this);
     cursor.insertText(text);
 }

@@ -4,6 +4,10 @@
 #include <QObject>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QAudioSource>
+#include <QAudioFormat>
+#include <QFile>
+#include <QTimer>
 #include <QProcess>
 #include <QDebug>
 #include <QProcessEnvironment>
@@ -56,6 +60,21 @@ private:
     QString resolvePythonExecutable() const;
     QProcessEnvironment buildPythonEnvironment() const;
     bool verifyPythonModules(const QString &pythonPath, QString *errorMessage) const;
+
+    QAudioSource *audioSource = nullptr;
+    QIODevice *audioDevice = nullptr;
+    QFile *wavFile = nullptr;
+    QTimer *pollTimer = nullptr;
+    QTimer *recordTimeout = nullptr;
+    QString tempWavPath;
+    bool isRecording = false;
+    quint32 recordedBytes = 0;
+
+    void startQtRecording(quint32 msec);
+    void stopQtRecording(bool cancel);
+    void finalizeWavFile(quint32 sampleRate, quint16 channels, quint16 bitsPerSample);
+    QByteArray makeWavHeader(quint32 sampleRate, quint16 channels, quint16 bitsPerSample, quint32 dataSize) const;
+    QString makeTempWavPath() const;
 };
 
 #endif // SPEECHMANAGER_H

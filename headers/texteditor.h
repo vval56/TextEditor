@@ -65,8 +65,7 @@ private slots:
     void speakSelectedText();
     void stopSpeaking();
     void onSpeechError(const QString &error);
-    void startDictation();
-    void onTextRecognized(const QString &text);
+    
 
 private:
     void createActions();
@@ -121,7 +120,6 @@ private:
 
     // Речь
     QAction *speakAct;
-    QAction *dictateAct;
     QAction *stopSpeechAct;
 
     // Справка

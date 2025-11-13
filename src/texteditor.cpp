@@ -1,4 +1,5 @@
 #include "../headers/texteditor.h"
+#include "../headers/document.h"
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QColorDialog>
@@ -16,6 +17,7 @@ TextEditor::TextEditor(QWidget *parent)
     speechManager(new SpeechManager(this))
 {
     textEdit = new QTextEdit(this);
+    textEdit->setDocument(new Document(textEdit));
     setCentralWidget(textEdit);
 
     // Устанавливаем Times New Roman по умолчанию
@@ -40,13 +42,6 @@ TextEditor::TextEditor(QWidget *parent)
     connect(themeComboBox, &QComboBox::currentTextChanged, this, &TextEditor::changeTheme);
     connect(toolsComboBox, &QComboBox::activated, this, &TextEditor::executeEditTool);
     connect(speechManager, &SpeechManager::errorOccurred, this, &TextEditor::onSpeechError);
-    connect(speechManager, &SpeechManager::textRecognized, this, &TextEditor::onTextRecognized);
-    connect(speechManager, &SpeechManager::listeningStarted, this, [this]() {
-        statusLabel->setText("Слушаю... Говорите сейчас");
-    });
-    connect(speechManager, &SpeechManager::listeningFinished, this, [this]() {
-        statusLabel->setText("Режим диктовки завершен");
-    });
 
     // Автосохранение
     autoSaveTimer = new QTimer(this);
@@ -154,10 +149,6 @@ void TextEditor::createActions()
     speakAct->setShortcut(QKeySequence("Ctrl+S"));
     connect(speakAct, &QAction::triggered, this, &TextEditor::speakSelectedText);
 
-    dictateAct = new QAction("🎤 Диктовка", this);
-    dictateAct->setShortcut(QKeySequence("Ctrl+D"));
-    connect(dictateAct, &QAction::triggered, this, &TextEditor::startDictation);
-
     stopSpeechAct = new QAction("⏹ Остановить озвучивание", this);
     connect(stopSpeechAct, &QAction::triggered, this, &TextEditor::stopSpeaking);
 
@@ -202,7 +193,6 @@ void TextEditor::createMenus()
     // Меню Речь с иконками
     speechMenu = menuBar()->addMenu("🔊 Речь");
     speechMenu->addAction(speakAct);
-    speechMenu->addAction(dictateAct);
     speechMenu->addSeparator();
     speechMenu->addAction(stopSpeechAct);
 
@@ -353,11 +343,6 @@ void TextEditor::speakSelectedText()
     }
 }
 
-void TextEditor::startDictation()
-{
-    speechManager->startListening();
-}
-
 void TextEditor::stopSpeaking()
 {
     speechManager->stopSpeaking();
@@ -370,13 +355,6 @@ void TextEditor::onSpeechError(const QString &error)
     statusLabel->setText("Ошибка: " + error);
 }
 
-void TextEditor::onTextRecognized(const QString &text)
-{
-    if (!text.isEmpty() && text != "Слушаю... Говорите сейчас") {
-        textEdit->textCursor().insertText(text + " ");
-        statusLabel->setText("Текст распознан и добавлен: " + text);
-    }
-}
 
 // Остальные методы остаются без изменений...
 
@@ -725,6 +703,10 @@ void TextEditor::about()
 
 void TextEditor::closeEvent(QCloseEvent *event)
 {
+    // Остановим озвучивание/диктовку перед закрытием окна, чтобы завершить QProcess
+    if (speechManager) {
+        speechManager->stopSpeaking();
+    }
     const bool isUnsavedNewDoc = currentFile.isEmpty() && !textEdit->toPlainText().trimmed().isEmpty();
     if (textEdit->document()->isModified() || isUnsavedNewDoc) {
         auto reply = QMessageBox::question(

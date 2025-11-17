@@ -1,4 +1,4 @@
-#include "libreofficehandler.h"
+#include "../headers/libreofficehandler.h"
 
 #include <QTextDocument>
 #include <QTemporaryDir>

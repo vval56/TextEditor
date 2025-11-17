@@ -14,10 +14,7 @@
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent),
-    themeManager_(&ThemeManager::getInstance()),
-    editToolManager_(std::make_unique<EditToolManager>()),
-    speechManager(new SpeechManager(this)),
-    currentFile("")
+    speechManager(new SpeechManager(this))
 {
     centralStack = new QStackedWidget(this);
     fileController_ = std::make_unique<TextFileController>(this);

@@ -70,7 +70,7 @@ private:
     {
         try {
             operation();
-        } catch (const std::runtime_error& e) {
+        } catch (const DocumentOperationException& e) {
             QMessageBox::critical(this, "Ошибка", errorMessage + ": " + e.what());
         }
     }
@@ -87,8 +87,8 @@ private:
     QPdfView *pdfView = nullptr;
     QPdfDocument *pdfDocument = nullptr;
 
-    ThemeManager* themeManager_;
-    std::unique_ptr<EditToolManager> editToolManager_;
+    ThemeManager* themeManager_ = &ThemeManager::getInstance();
+    std::unique_ptr<EditToolManager> editToolManager_ = std::make_unique<EditToolManager>();
     SpeechManager *speechManager;
 
     std::unique_ptr<TextFormatController> formatController_;

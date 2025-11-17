@@ -12,15 +12,6 @@ TextFormatController::TextFormatController(QTextEdit *textEdit,
                                            QObject *parent)
     : QObject(parent)
     , textEdit_(textEdit)
-    , boldAct_(nullptr)
-    , italicAct_(nullptr)
-    , underlineAct_(nullptr)
-    , alignLeftAct_(nullptr)
-    , alignCenterAct_(nullptr)
-    , alignRightAct_(nullptr)
-    , alignJustifyAct_(nullptr)
-    , fontCombo_(nullptr)
-    , fontSizeCombo_(nullptr)
 {
 }
 

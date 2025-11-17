@@ -24,7 +24,7 @@ public:
     
 private:
     std::unordered_map<QString, std::unique_ptr<ITheme>> themes_;
-    ITheme* currentTheme_;
+    ITheme* currentTheme_ = nullptr;
     
     void initializeDefaultThemes();
 };

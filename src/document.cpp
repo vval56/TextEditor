@@ -5,7 +5,7 @@
 #include <QStringConverter>
 
 Document::Document(QObject *parent)
-    : QObject(parent), m_fileSize(0), m_isNew(true), m_doc(new QTextDocument(this))
+    : QObject(parent), m_fileSize(0), m_doc(new QTextDocument(this))
 {
     connect(m_doc, &QTextDocument::contentsChanged, this, [this]() {
         setModified(true);
@@ -13,7 +13,7 @@ Document::Document(QObject *parent)
 }
 
 Document::Document(const QString &text, QObject *parent)
-    : QObject(parent), m_fileSize(0), m_isNew(true), m_doc(new QTextDocument(this))
+    : QObject(parent), m_fileSize(0), m_doc(new QTextDocument(this))
 {
     m_doc->setPlainText(text);
     connect(m_doc, &QTextDocument::contentsChanged, this, [this]() {

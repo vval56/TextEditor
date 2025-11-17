@@ -1,7 +1,7 @@
 #include "../headers/thememanager.h"
 #include <stdexcept>
 
-ThemeManager::ThemeManager() : currentTheme_(nullptr) {
+ThemeManager::ThemeManager() {
     initializeDefaultThemes();
 }
 

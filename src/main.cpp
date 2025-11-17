@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     try {
         TextEditor editor;
         editor.show();
-        return app.exec();
+        return QApplication::exec();
     } catch (const std::exception& e) {
         QMessageBox::critical(nullptr, "Fatal Error",
                               QString("Application failed to start: %1").arg(e.what()));

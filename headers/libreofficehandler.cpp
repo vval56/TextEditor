@@ -32,17 +32,28 @@ bool copyRecursively(const QString &sourceDirPath, const QString &destinationDir
 
     QDir().mkpath(destinationDirPath);
     const QFileInfoList entries = source.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-    const bool ok = std::all_of(entries.cbegin(), entries.cend(), [&](const QFileInfo &entry){
+
+    bool ok = true;
+    for (const QFileInfo &entry : entries) {
         const QString srcPath = entry.absoluteFilePath();
         const QString dstPath = destinationDirPath + QDir::separator() + entry.fileName();
+
+        bool result = false;
         if (entry.isDir()) {
-            return copyRecursively(srcPath, dstPath);
+            result = copyRecursively(srcPath, dstPath);
+        } else {
+            if (QFile::exists(dstPath)) {
+                QFile::remove(dstPath);
+            }
+            result = QFile::copy(srcPath, dstPath);
         }
-        if (QFile::exists(dstPath)) {
-            QFile::remove(dstPath);
+
+        if (!result) {
+            ok = false;
+            break;
         }
-        return QFile::copy(srcPath, dstPath);
-    });
+    }
+
     return ok;
 }
 
@@ -121,7 +132,6 @@ bool LibreOfficeHandler::load(const QString &filePath,
 
     QTextStream stream(&html);
 
-    // Установка кодировки для разных версий Qt
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     stream.setEncoding(QStringConverter::Utf8);
 #else
@@ -136,7 +146,6 @@ bool LibreOfficeHandler::load(const QString &filePath,
 
     context.isReadOnly = false;
 
-    // Важно: tempDir уничтожится, поэтому копируем файлы в постоянную директорию
     QString persistentDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (persistentDir.isEmpty()) {
         persistentDir = QDir::tempPath();
@@ -152,7 +161,6 @@ bool LibreOfficeHandler::load(const QString &filePath,
     }
     QDir().mkpath(sessionDirPath);
 
-    // Копируем все файлы из временного каталога
     if (!libreoffice_internal::copyRecursively(tempDir.path(), sessionDirPath)) {
         error = QObject::tr("Не удалось скопировать временные файлы LibreOffice в рабочую директорию");
         return false;

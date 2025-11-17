@@ -9,6 +9,8 @@
 #include <QTextStream>
 #include <QTextDocumentWriter>
 #include <QFile>
+#include <algorithm>
+#include <ranges>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QStringConverter>
@@ -18,8 +20,7 @@ namespace {
 
 const QStringList kLibreOfficeExtensions = {
     QStringLiteral("docx"),
-    QStringLiteral("odt"),
-    QStringLiteral("pdf")
+    QStringLiteral("odt")
 };
 
 bool copyRecursively(const QString &sourceDirPath, const QString &destinationDirPath)
@@ -31,7 +32,7 @@ bool copyRecursively(const QString &sourceDirPath, const QString &destinationDir
 
     QDir().mkpath(destinationDirPath);
     const QFileInfoList entries = source.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-    for (const QFileInfo &entry : entries) {
+    return std::ranges::all_of(entries, [&](const QFileInfo &entry) {
         const QString srcPath = entry.absoluteFilePath();
         const QString dstPath = destinationDirPath + QDir::separator() + entry.fileName();
         if (entry.isDir()) {
@@ -46,8 +47,8 @@ bool copyRecursively(const QString &sourceDirPath, const QString &destinationDir
                 return false;
             }
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 QStringList possibleLibreOfficeBinaries()
@@ -73,9 +74,6 @@ QString targetFormatForExtension(const QString &extension)
     }
     if (extension == QLatin1String("odt")) {
         return QStringLiteral("odt");
-    }
-    if (extension == QLatin1String("pdf")) {
-        return QStringLiteral("pdf");
     }
     return extension;
 }
@@ -125,7 +123,6 @@ bool LibreOfficeHandler::load(const QString &filePath,
 
     QTextStream stream(&html);
 
-    // Установка кодировки для разных версий Qt
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     stream.setEncoding(QStringConverter::Utf8);
 #else
@@ -140,7 +137,6 @@ bool LibreOfficeHandler::load(const QString &filePath,
 
     context.isReadOnly = false;
 
-    // Важно: tempDir уничтожится, поэтому копируем файлы в постоянную директорию
     QString persistentDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (persistentDir.isEmpty()) {
         persistentDir = QDir::tempPath();
@@ -156,7 +152,6 @@ bool LibreOfficeHandler::load(const QString &filePath,
     }
     QDir().mkpath(sessionDirPath);
 
-    // Копируем все файлы из временного каталога
     if (!copyRecursively(tempDir.path(), sessionDirPath)) {
         error = QObject::tr("Не удалось скопировать временные файлы LibreOffice в рабочую директорию");
         return false;
@@ -199,14 +194,15 @@ bool LibreOfficeHandler::save(const QString &filePath,
         context.workingFile = htmlPath;
     }
 
-    QTextDocumentWriter writer(htmlPath, QByteArray("HTML"));
-    if (!writer.write(document)) {
+    if (QTextDocumentWriter writer(htmlPath, QByteArray("HTML")); !writer.write(document)) {
         error = QObject::tr("Не удалось сохранить HTML для конвертации");
         return false;
     }
 
-    QString convertError;
-    if (!convertFromHtml(htmlPath, targetFormatForExtension(extension), filePath, convertError)) {
+    if (QString convertError; !convertFromHtml(htmlPath,
+                                              targetFormatForExtension(extension),
+                                              filePath,
+                                              convertError)) {
         error = convertError;
         return false;
     }
@@ -229,19 +225,17 @@ bool LibreOfficeHandler::ensureLibreOfficeAvailable(QString &error) const
 
 QString LibreOfficeHandler::findLibreOfficeExecutable() const
 {
-    QByteArray env = qgetenv("SOFFICE_PATH");
-    if (!env.isEmpty()) {
+    if (QByteArray env = qgetenv("SOFFICE_PATH"); !env.isEmpty()) {
         QFileInfo envInfo(QString::fromLocal8Bit(env));
         if (envInfo.isExecutable()) {
             return envInfo.absoluteFilePath();
         }
     }
     for (const QString &candidate : possibleLibreOfficeBinaries()) {
-        QFileInfo info(candidate);
-        if (info.isExecutable()) {
+        if (QFileInfo info(candidate); info.isExecutable()) {
             return info.absoluteFilePath();
         }
-        QString fromPath = QStandardPaths::findExecutable(candidate);
+        const QString fromPath = QStandardPaths::findExecutable(candidate);
         if (!fromPath.isEmpty()) {
             return fromPath;
         }

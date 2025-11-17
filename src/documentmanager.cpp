@@ -2,7 +2,7 @@
 #include "documenthandler.h"
 #include "plaintexthandler.h"
 #include "libreofficehandler.h"
-#include "pdfhandler.h"  // Добавьте этот include
+#include "pdfhandler.h" 
 
 #include <QTextDocument>
 #include <QFileInfo>
@@ -23,10 +23,9 @@ QString normalizeExtension(const QString &path)
 
 DocumentManager::DocumentManager()
 {
-    // Добавьте PdfHandler в список обработчиков
     handlers_.push_back(std::make_unique<PlainTextHandler>());
     handlers_.push_back(std::make_unique<LibreOfficeHandler>());
-    handlers_.push_back(std::make_unique<PdfHandler>());  // Добавьте эту строку
+    handlers_.push_back(std::make_unique<PdfHandler>());
 }
 
 DocumentManager::~DocumentManager() = default;
@@ -95,7 +94,7 @@ QString DocumentManager::filterForOpenDialog() const
     parts << QObject::tr("Все файлы (*.*)");
     parts << QObject::tr("Текстовые файлы (*.txt *.cc *.cpp *.h *.hpp)");
     parts << QObject::tr("Документы (*.docx *.odt)");
-    parts << QObject::tr("PDF файлы (*.pdf)");  // Добавьте фильтр для PDF
+    parts << QObject::tr("PDF файлы (*.pdf)");
     return parts.join(";;");
 }
 
@@ -104,7 +103,7 @@ QString DocumentManager::filterForSaveDialog() const
     QStringList parts;
     parts << QObject::tr("Текстовые файлы (*.txt *.cc *.cpp *.h *.hpp)");
     parts << QObject::tr("Документы (*.docx *.odt)");
-    parts << QObject::tr("PDF файлы (*.pdf)");  // Добавьте фильтр для PDF
+    parts << QObject::tr("PDF файлы (*.pdf)");
     return parts.join(";;");
 }
 

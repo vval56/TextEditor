@@ -37,5 +37,5 @@ private:
     QString libreOfficeBinary_;
 };
 
-#endif // LIBREOFFICEHANDLER_H
+#endif
 

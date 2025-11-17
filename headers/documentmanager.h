@@ -31,4 +31,4 @@ private:
     DocumentHandler *selectHandlerForExtension(const QString &extension, bool forSave) const;
 };
 
-#endif // DOCUMENTMANAGER_H
+#endif

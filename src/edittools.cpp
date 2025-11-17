@@ -3,30 +3,44 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 
-void UpperCaseTool::execute(QTextEdit* textEdit) {
-    QString selectedText = textEdit->textCursor().selectedText();
+void UpperCaseTool::execute(IDocument* document, QTextEdit* textEdit) {
+    (void)textEdit;
+    if (!document) {
+        return;
+    }
+    const QString selectedText = document->getSelectedText();
     if (!selectedText.isEmpty()) {
-        textEdit->textCursor().insertText(selectedText.toUpper());
+        document->insertTextAtCursor(selectedText.toUpper());
     }
 }
 
-bool UpperCaseTool::canExecute(QTextEdit* textEdit) const {
-    return !textEdit->textCursor().selectedText().isEmpty();
+bool UpperCaseTool::canExecute(IDocument* document, QTextEdit* textEdit) const {
+    (void)textEdit;
+    return document && !document->getSelectedText().isEmpty();
 }
 
-void LowerCaseTool::execute(QTextEdit* textEdit) {
-    QString selectedText = textEdit->textCursor().selectedText();
+void LowerCaseTool::execute(IDocument* document, QTextEdit* textEdit) {
+    (void)textEdit;
+    if (!document) {
+        return;
+    }
+    const QString selectedText = document->getSelectedText();
     if (!selectedText.isEmpty()) {
-        textEdit->textCursor().insertText(selectedText.toLower());
+        document->insertTextAtCursor(selectedText.toLower());
     }
 }
 
-bool LowerCaseTool::canExecute(QTextEdit* textEdit) const {
-    return !textEdit->textCursor().selectedText().isEmpty();
+bool LowerCaseTool::canExecute(IDocument* document, QTextEdit* textEdit) const {
+    (void)textEdit;
+    return document && !document->getSelectedText().isEmpty();
 }
 
-void WordCountTool::execute(QTextEdit* textEdit) {
-    QString text = textEdit->toPlainText();
+void WordCountTool::execute(IDocument* document, QTextEdit* textEdit) {
+    (void)textEdit;
+    if (!document) {
+        return;
+    }
+    const QString text = document->getPlainText();
     qsizetype wordCount = 0;
     qsizetype charCount = text.length();
     qsizetype lineCount = text.count('\n') + 1;
@@ -36,12 +50,13 @@ void WordCountTool::execute(QTextEdit* textEdit) {
 
     QMessageBox::information(nullptr, "Word Count",
                              QString("Words: %1\nCharacters: %2\nLines: %3")
-                                 .arg(static_cast<qlonglong>(wordCount))
-                                 .arg(static_cast<qlonglong>(charCount))
-                                 .arg(static_cast<qlonglong>(lineCount)));
+                                 .arg(wordCount)
+                                 .arg(charCount)
+                                 .arg(lineCount));
 }
 
-void DuplicateLineTool::execute(QTextEdit* textEdit) {
+void DuplicateLineTool::execute(IDocument* document, QTextEdit* textEdit) {
+    (void)document;
     QTextCursor cursor = textEdit->textCursor();
     cursor.select(QTextCursor::LineUnderCursor);
     QString lineText = cursor.selectedText();
@@ -69,10 +84,10 @@ std::vector<IEditTool*> EditToolManager::getAvailableTools() const {
     return availableTools;
 }
 
-void EditToolManager::executeTool(const QString& name, QTextEdit* textEdit) const {
+void EditToolManager::executeTool(const QString& name, IDocument* document, QTextEdit* textEdit) const {
     for (const auto& tool : tools_) {
-        if (tool->getName() == name && tool->canExecute(textEdit)) {
-            tool->execute(textEdit);
+        if (tool->getName() == name && tool->canExecute(document, textEdit)) {
+            tool->execute(document, textEdit);
             return;
         }
     }

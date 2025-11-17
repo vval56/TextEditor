@@ -44,7 +44,7 @@ bool PlainTextHandler::load(const QString &filePath,
     }
 
     QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Utf8);  // Замена setCodec
+    stream.setEncoding(QStringConverter::Utf8); 
     document->setPlainText(stream.readAll());
     file.close();
 
@@ -67,7 +67,7 @@ bool PlainTextHandler::save(const QString &filePath,
     }
 
     QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Utf8);  // Замена setCodec
+    stream.setEncoding(QStringConverter::Utf8); 
     stream << document->toPlainText();
     file.close();
 

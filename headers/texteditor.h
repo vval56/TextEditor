@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTextEdit>
+#include <QStackedWidget>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
@@ -14,7 +15,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QFontComboBox>
-#include <QInputDialog>  // Добавь эту строку
+#include <QInputDialog> 
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QTimer>
@@ -25,6 +26,14 @@
 #include "edittools.h"
 #include "speechmanager.h"
 #include "documentmanager.h"
+#include "textfilecontroller.h"
+#include "texteditorui.h"
+
+class QPdfView;
+class QPdfDocument;
+class Document;
+class TextFormatController;
+class TextEditorUi;
 
 class TextEditor : public QMainWindow
 {
@@ -32,121 +41,62 @@ class TextEditor : public QMainWindow
 
 public:
     explicit TextEditor(QWidget *parent = nullptr);
-    ~TextEditor();
-    
+    ~TextEditor() override;
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    void newFile();
-    void openFile();
-    void saveFile();
-    void saveAsFile();
     void about();
     void changeTheme(const QString& themeName);
     void executeEditTool();
     void updateStatusBar();
     void onTextChanged();
 
-    // Форматирование текста
-    void textBold();
-    void textItalic();
-    void textUnderline();
-    void textAlignLeft();
-    void textAlignCenter();
-    void textAlignRight();
-    void textAlignJustify();
-    void textFamily(const QString &f);
-    void textSize(const QString &p);
-    void textColor();
-    void currentCharFormatChanged(const QTextCharFormat &format);
-
-    // Речь
     void speakSelectedText();
     void stopSpeaking();
     void onSpeechError(const QString &error);
     
 
 private:
-    void createActions();
-    void createMenus();
-    void createToolBars();
-    void createStatusBar();
     void applyTheme();
     void setupEditTools();
     void setupFormatActions();
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void updateAlignmentButtons();
 
-    void handleFileOperation(const std::function<void()>& operation, const QString& errorMessage);
+    template<typename Operation>
+    void handleFileOperation(Operation operation, const QString& errorMessage)
+    {
+        try {
+            operation();
+        } catch (const std::runtime_error& e) {
+            QMessageBox::critical(this, "Ошибка", errorMessage + ": " + e.what());
+        }
+    }
     void startAutoSaveIfNeeded();
     void stopAutoSave();
     void scheduleAutoSave();
 
+    friend class TextFileController;
+    friend class TextEditorUi;
+
+    QStackedWidget *centralStack = nullptr;
     QTextEdit *textEdit;
-
-    // Меню (только в строке меню)
-    QMenu *fileMenu;
-    QMenu *editMenu;
-    QMenu *formatMenu;
-    QMenu *viewMenu;
-    QMenu *toolsMenu;
-    QMenu *helpMenu;
-    QMenu *speechMenu;
-
-    // Файл
-    QAction *newAct;
-    QAction *openAct;
-    QAction *saveAct;
-    QAction *saveAsAct;
-    QAction *exitAct;
-
-    // Правка
-    QAction *cutAct;
-    QAction *copyAct;
-    QAction *pasteAct;
-    QAction *undoAct;
-    QAction *redoAct;
-
-    // Форматирование
-    QAction *boldAct;
-    QAction *italicAct;
-    QAction *underlineAct;
-    QAction *alignLeftAct;
-    QAction *alignCenterAct;
-    QAction *alignRightAct;
-    QAction *alignJustifyAct;
-    QAction *textColorAct;
-
-    // Речь
-    QAction *speakAct;
-    QAction *stopSpeechAct;
-
-    // Справка
-    QAction *aboutAct;
-
-    // Панели инструментов
-    QToolBar *fileToolBar;
-    QToolBar *editToolBar;
-    QToolBar *formatToolBar;
-    QToolBar *speechToolBar;
-
-    // Элементы форматирования
-    QFontComboBox *fontCombo;
-    QComboBox *fontSizeCombo;
-
-    QLabel *statusLabel;
-    QLabel *themeLabel;
-    QComboBox *themeComboBox;
-    QComboBox *toolsComboBox;
+    Document *document_ = nullptr;
+    QPdfView *pdfView = nullptr;
+    QPdfDocument *pdfDocument = nullptr;
 
     ThemeManager* themeManager_;
     std::unique_ptr<EditToolManager> editToolManager_;
     SpeechManager *speechManager;
 
+    std::unique_ptr<TextFormatController> formatController_;
+    std::unique_ptr<TextFileController> fileController_;
+    std::unique_ptr<TextEditorUi> ui_;
+
     QString currentFile;
 
-    // Автосохранение для открытых из файла документов
     QTimer *autoSaveTimer;
     bool autoSaveEnabled = false;
 

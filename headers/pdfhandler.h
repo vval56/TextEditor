@@ -24,6 +24,6 @@ private:
     bool convertPdfToHtmlStdout(const QString &pdfPath, QString &htmlOut, QString &error) const;
 };
 
-#endif // PDFHANDLER_H
+#endif
 
 

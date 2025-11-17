@@ -20,5 +20,5 @@ public:
               QString &error) override;
 };
 
-#endif // PLAINTEXTHANDLER_H
+#endif
 

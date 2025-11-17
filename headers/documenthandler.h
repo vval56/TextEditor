@@ -37,5 +37,5 @@ public:
 
 using DocumentHandlerPtr = std::unique_ptr<DocumentHandler>;
 
-#endif // DOCUMENTHANDLER_H
+#endif
 

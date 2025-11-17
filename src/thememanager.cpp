@@ -6,7 +6,7 @@ ThemeManager::ThemeManager() : currentTheme_(nullptr) {
 }
 
 ThemeManager& ThemeManager::getInstance() {
-    static ThemeManager instance;
+    static ThemeManager instance; // NOSONAR - Meyers singleton pattern
     return instance;
 }
 
@@ -23,14 +23,15 @@ void ThemeManager::registerTheme(std::unique_ptr<ITheme> theme) {
         throw ThemeException("Cannot register null theme");
     }
     
-    QString name = theme->getName();
-    themes_.emplace(name, std::move(theme));
+    const QString name = theme->getName();
+    themes_.try_emplace(name, std::move(theme));
 }
 
 MyVector<QString> ThemeManager::getAvailableThemes() const {
     MyVector<QString> themeNames;
-    for (const auto& pair : themes_) {
-        themeNames.push_back(pair.first);
+    for (const auto& [name, themePtr] : themes_) {
+        (void)themePtr;
+        themeNames.push_back(name);
     }
     return themeNames;
 }

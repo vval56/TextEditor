@@ -18,7 +18,7 @@ class SpeechManager : public QObject
 
 public:
     explicit SpeechManager(QObject *parent = nullptr);
-    ~SpeechManager();
+    ~SpeechManager() override;
 
     // Синтез речи (озвучивание текста)
     void speakText(const QString &text);

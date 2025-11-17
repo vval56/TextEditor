@@ -220,13 +220,11 @@ QString SpeechManager::makeTempWavPath() const
 
 SpeechManager::~SpeechManager()
 {
-    if (speechProcess) {
-        if (speechProcess->state() == QProcess::Running) {
-            speechProcess->terminate();
-            if (!speechProcess->waitForFinished(2000)) {
-                speechProcess->kill();
-                speechProcess->waitForFinished(1000);
-            }
+    if (speechProcess && speechProcess->state() == QProcess::Running) {
+        speechProcess->terminate();
+        if (!speechProcess->waitForFinished(2000)) {
+            speechProcess->kill();
+            speechProcess->waitForFinished(1000);
         }
     }
     delete mediaPlayer;
@@ -457,13 +455,11 @@ void SpeechManager::handleRecognitionErrorOutput(const QString &errorOutput)
 QString SpeechManager::resolvePythonExecutable() const
 {
     QStringList candidates;
-    const QString envCandidate = QString::fromLocal8Bit(qgetenv("PYTHON3_PATH"));
-    if (!envCandidate.trimmed().isEmpty()) {
+    if (const QString envCandidate = QString::fromLocal8Bit(qgetenv("PYTHON3_PATH")); !envCandidate.trimmed().isEmpty()) {
         candidates << envCandidate.trimmed();
     }
 
-    const QString pathCandidate = QStandardPaths::findExecutable(QStringLiteral("python3"));
-    if (!pathCandidate.isEmpty()) {
+    if (const QString pathCandidate = QStandardPaths::findExecutable(QStringLiteral("python3")); !pathCandidate.isEmpty()) {
         candidates << pathCandidate;
     }
 
@@ -507,7 +503,7 @@ QProcessEnvironment SpeechManager::buildPythonEnvironment() const
         QStringLiteral("/Library/Frameworks/Python.framework/Versions/3.14/bin")
     };
 
-    const QString separator = QString(QDir::listSeparator());
+    const auto separator = QString(QDir::listSeparator());
     QStringList segments = path.split(QDir::listSeparator(), Qt::SkipEmptyParts);
     for (const QString &extra : extraPaths) {
         if (!segments.contains(extra)) {

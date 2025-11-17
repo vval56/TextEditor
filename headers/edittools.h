@@ -48,7 +48,7 @@ public:
 
     void registerTool(std::unique_ptr<IEditTool> tool);
     std::vector<IEditTool*> getAvailableTools() const;
-    void executeTool(const QString& name, QTextEdit* textEdit);
+    void executeTool(const QString& name, QTextEdit* textEdit) const;
 
 private:
     std::vector<std::unique_ptr<IEditTool>> tools_;

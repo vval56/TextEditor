@@ -5,8 +5,9 @@
 #include <QTextDocument>
 #include <QFileInfo>
 #include <QDateTime>
+#include "idocument.h"
 
-class Document : public QTextDocument
+class Document : public QTextDocument, public IDocument
 {
     Q_OBJECT
 
@@ -24,26 +25,26 @@ public:
     QString getFilePath() const;
     QDateTime getLastModified() const;
     qint64 getFileSize() const;
-    bool isModified() const;
+    bool isModified() const override;
     bool isNew() const;
 
     // Статистика документа
-    int getWordCount() const;
-    int getCharacterCount() const;
-    int getLineCount() const;
-    int getParagraphCount() const;
+    int getWordCount() const override;
+    int getCharacterCount() const override;
+    int getLineCount() const override;
+    int getParagraphCount() const override;
 
     // Методы для работы с содержимым
-    QString getPlainText() const;
-    void setPlainText(const QString &text);
+    QString getPlainText() const override;
+    void setPlainText(const QString &text) override;
 
     // Методы форматирования
-    void applyFontFamily(const QString &family);
-    void applyFontSize(int size);
-    void applyBold(bool bold);
-    void applyItalic(bool italic);
-    void applyUnderline(bool underline);
-    void applyTextColor(const QColor &color);
+    void applyFontFamily(const QString &family) override;
+    void applyFontSize(int size) override;
+    void applyBold(bool bold) override;
+    void applyItalic(bool italic) override;
+    void applyUnderline(bool underline) override;
+    void applyTextColor(const QColor &color) override;
     void applyAlignment(Qt::Alignment alignment);
 
     // Методы поиска и замены
@@ -55,9 +56,9 @@ public:
     bool canRedo() const;
 
     // Методы для работы с речью
-    QString getSelectedText() const;
-    QString getAllText() const;
-    void insertTextAtCursor(const QString &text);
+    QString getSelectedText() const override;
+    QString getAllText() const override;
+    void insertTextAtCursor(const QString &text) override;
 
 public slots:
     void setModified(bool modified = true);

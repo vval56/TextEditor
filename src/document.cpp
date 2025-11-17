@@ -2,6 +2,7 @@
 #include <QTextStream>
 #include <QFile>
 #include <QTextCursor>
+#include <QFont>
 #include <QStringConverter>
 #include <QRegularExpression>
 
@@ -171,7 +172,43 @@ void Document::applyBold(bool bold)
     cursor.mergeCharFormat(format);
 }
 
-// Аналогично для italic, underline, color, alignment...
+void Document::applyItalic(bool italic)
+{
+    QTextCursor cursor(this);
+    if (!cursor.hasSelection()) {
+        cursor.select(QTextCursor::WordUnderCursor);
+    }
+
+    QTextCharFormat format;
+    format.setFontItalic(italic);
+    cursor.mergeCharFormat(format);
+}
+
+void Document::applyUnderline(bool underline)
+{
+    QTextCursor cursor(this);
+    if (!cursor.hasSelection()) {
+        cursor.select(QTextCursor::WordUnderCursor);
+    }
+
+    QTextCharFormat format;
+    format.setFontUnderline(underline);
+    cursor.mergeCharFormat(format);
+}
+
+void Document::applyTextColor(const QColor &color)
+{
+    QTextCursor cursor(this);
+    if (!cursor.hasSelection()) {
+        cursor.select(QTextCursor::WordUnderCursor);
+    }
+
+    QTextCharFormat format;
+    format.setForeground(QBrush(color));
+    cursor.mergeCharFormat(format);
+}
+
+// Аналогично для alignment...
 
 QString Document::getSelectedText() const
 {

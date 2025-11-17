@@ -12,9 +12,9 @@
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent),
     themeManager_(&ThemeManager::getInstance()),
-    currentFile(""),
     editToolManager_(std::make_unique<EditToolManager>()),
-    speechManager(new SpeechManager(this))
+    speechManager(new SpeechManager(this)),
+    currentFile("")
 {
     textEdit = new QTextEdit(this);
     textEdit->setDocument(new Document(textEdit));
@@ -243,9 +243,9 @@ void TextEditor::createToolBars()
     fontSizeCombo->setMaximumWidth(50);
 
     // Стандартные размеры шрифтов
-    QFontDatabase db;
-    foreach(int size, db.standardSizes())
+    for (const int size : QFontDatabase::standardSizes()) {
         fontSizeCombo->addItem(QString::number(size));
+    }
 
     fontSizeCombo->setCurrentText("12");
     formatToolBar->addWidget(fontSizeCombo);
@@ -267,12 +267,12 @@ void TextEditor::createToolBars()
     formatToolBar->addSeparator();
 
     // Кнопка цвета текста с выпадающим меню
-    QToolButton *colorButton = new QToolButton();
+    auto *colorButton = new QToolButton();
     colorButton->setDefaultAction(textColorAct);
     colorButton->setPopupMode(QToolButton::MenuButtonPopup);
 
     // Создаем меню с базовыми цветами
-    QMenu *colorMenu = new QMenu(this);
+    auto *colorMenu = new QMenu(this);
 
     // Базовые цвета
     QList<QColor> basicColors = {
@@ -289,8 +289,8 @@ void TextEditor::createToolBars()
         "Желтый", "Темно-желтый", "Серый", "Темно-серый"
     };
 
-    for (int i = 0; i < basicColors.size(); ++i) {
-        QAction *colorAction = new QAction(colorNames[i], this);
+    for (int i = 0, n = std::min(basicColors.size(), colorNames.size()); i < n; ++i) {
+        auto *colorAction = new QAction(colorNames[i], this);
 
         // Создаем иконку цвета
         QPixmap pixmap(16, 16);
@@ -308,7 +308,7 @@ void TextEditor::createToolBars()
     }
 
     // Добавляем действие для выбора произвольного цвета
-    QAction *customColorAction = new QAction("Другой цвет...", this);
+    auto *customColorAction = new QAction("Другой цвет...", this);
     colorMenu->addAction(customColorAction);
     connect(customColorAction, &QAction::triggered, this, &TextEditor::textColor);
 
@@ -327,9 +327,7 @@ void TextEditor::createToolBars()
 void TextEditor::speakSelectedText()
 {
     QString textToSpeak;
-    QTextCursor cursor = textEdit->textCursor();
-
-    if (cursor.hasSelection()) {
+    if (QTextCursor cursor = textEdit->textCursor(); cursor.hasSelection()) {
         textToSpeak = cursor.selectedText();
     } else {
         textToSpeak = textEdit->toPlainText();
@@ -374,8 +372,8 @@ void TextEditor::createStatusBar()
     std::cout << "Available themes (" << themes.size() << "): ";
     themes.print();
 
-    for (auto it = themes.begin(); it != themes.end(); ++it) {
-        themeComboBox->addItem(*it);
+    for (const auto &t : themes) {
+        themeComboBox->addItem(t);
     }
 
     themeComboBox->setCurrentText(themeManager_->getCurrentTheme()->getName());
@@ -397,7 +395,7 @@ void TextEditor::setupEditTools()
 void TextEditor::setupFormatActions()
 {
     // Группируем действия выравнивания
-    QActionGroup *alignGroup = new QActionGroup(this);
+    auto *alignGroup = new QActionGroup(this);
     alignGroup->addAction(alignLeftAct);
     alignGroup->addAction(alignCenterAct);
     alignGroup->addAction(alignRightAct);
@@ -417,7 +415,7 @@ void TextEditor::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 void TextEditor::applyTheme()
 {
     try {
-        ITheme* theme = themeManager_->getCurrentTheme();
+        const ITheme* theme = themeManager_->getCurrentTheme();
         setStyleSheet(theme->getStylesheet());
         updateStatusBar();
     } catch (const ThemeException& e) {
@@ -429,7 +427,7 @@ void TextEditor::handleFileOperation(const std::function<void()>& operation, con
 {
     try {
         operation();
-    } catch (const std::exception& e) {
+    } catch (const std::runtime_error& e) {
         QMessageBox::critical(this, "Ошибка", errorMessage + ": " + e.what());
     }
 }
@@ -482,7 +480,7 @@ void TextEditor::textUnderline()
 void TextEditor::textFamily(const QString &f)
 {
     QTextCharFormat fmt;
-    fmt.setFontFamily(f);
+    fmt.setFontFamilies({f});
     mergeFormatOnWordOrSelection(fmt);
 }
 
@@ -591,8 +589,7 @@ void TextEditor::openFile()
                                                         documentManager_.filterForOpenDialog());
 
         if (!fileName.isEmpty()) {
-            QString error;
-            if (!documentManager_.loadDocument(fileName, textEdit->document(), error)) {
+            if (QString error; !documentManager_.loadDocument(fileName, textEdit->document(), error)) {
                 throw std::runtime_error(error.toStdString());
             }
 
@@ -611,8 +608,7 @@ void TextEditor::saveFile()
         if (currentFile.isEmpty()) {
             saveAsFile();
         } else {
-            QString error;
-            if (!documentManager_.saveDocument(currentFile, textEdit->document(), error)) {
+            if (QString error; !documentManager_.saveDocument(currentFile, textEdit->document(), error)) {
                 throw std::runtime_error(error.toStdString());
             }
 
@@ -631,8 +627,7 @@ void TextEditor::saveAsFile()
                                                         documentManager_.filterForSaveDialog());
 
         if (!fileName.isEmpty()) {
-            QString error;
-            if (!documentManager_.saveDocument(fileName, textEdit->document(), error)) {
+            if (QString error; !documentManager_.saveDocument(fileName, textEdit->document(), error)) {
                 throw std::runtime_error(error.toStdString());
             }
 
@@ -665,12 +660,12 @@ void TextEditor::executeEditTool()
 void TextEditor::updateStatusBar()
 {
     QString text = textEdit->toPlainText();
-    int lines = text.count('\n') + 1;
+    int lines = static_cast<int>(text.count('\n')) + 1;
 
     QStringList words = text.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
-    int wordCount = words.size();
+    int wordCount = static_cast<int>(words.size());
 
-    int characters = text.length();
+    int characters = static_cast<int>(text.length());
 
     QString status = QString("Строк: %1 | Слов: %2 | Символов: %3 | Тема: %4")
                          .arg(lines).arg(wordCount).arg(characters)
@@ -707,8 +702,8 @@ void TextEditor::closeEvent(QCloseEvent *event)
     if (speechManager) {
         speechManager->stopSpeaking();
     }
-    const bool isUnsavedNewDoc = currentFile.isEmpty() && !textEdit->toPlainText().trimmed().isEmpty();
-    if (textEdit->document()->isModified() || isUnsavedNewDoc) {
+    if (const bool isUnsavedNewDoc = currentFile.isEmpty() && !textEdit->toPlainText().trimmed().isEmpty();
+        textEdit->document()->isModified() || isUnsavedNewDoc) {
         auto reply = QMessageBox::question(
             this,
             "Выход",

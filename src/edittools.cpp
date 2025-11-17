@@ -27,16 +27,18 @@ bool LowerCaseTool::canExecute(QTextEdit* textEdit) const {
 
 void WordCountTool::execute(QTextEdit* textEdit) {
     QString text = textEdit->toPlainText();
-    int wordCount = 0;
-    int charCount = text.length();
-    int lineCount = text.count('\n') + 1;
+    qsizetype wordCount = 0;
+    qsizetype charCount = text.length();
+    qsizetype lineCount = text.count('\n') + 1;
 
     QStringList words = text.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
     wordCount = words.size();
 
     QMessageBox::information(nullptr, "Word Count",
                              QString("Words: %1\nCharacters: %2\nLines: %3")
-                                 .arg(wordCount).arg(charCount).arg(lineCount));
+                                 .arg(static_cast<qlonglong>(wordCount))
+                                 .arg(static_cast<qlonglong>(charCount))
+                                 .arg(static_cast<qlonglong>(lineCount)));
 }
 
 void DuplicateLineTool::execute(QTextEdit* textEdit) {
@@ -67,7 +69,7 @@ std::vector<IEditTool*> EditToolManager::getAvailableTools() const {
     return availableTools;
 }
 
-void EditToolManager::executeTool(const QString& name, QTextEdit* textEdit) {
+void EditToolManager::executeTool(const QString& name, QTextEdit* textEdit) const {
     for (const auto& tool : tools_) {
         if (tool->getName() == name && tool->canExecute(textEdit)) {
             tool->execute(textEdit);

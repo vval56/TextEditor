@@ -24,8 +24,8 @@ bool PdfHandler::canSave(const QString &extension) const { return isPdf(extensio
 bool PdfHandler::ensurePdfToolsAvailable(QString &error) const
 {
     const QString pdftohtml = QStandardPaths::findExecutable(QStringLiteral("pdftohtml"));
-    const QString pdftotext = QStandardPaths::findExecutable(QStringLiteral("pdftotext"));
-    if (pdftohtml.isEmpty() && pdftotext.isEmpty()) {
+    if (const QString pdftotext = QStandardPaths::findExecutable(QStringLiteral("pdftotext"));
+        pdftohtml.isEmpty() && pdftotext.isEmpty()) {
         error = QObject::tr("Не найдены утилиты pdftohtml/pdftotext (poppler). Установите: brew install poppler");
         return false;
     }
@@ -34,8 +34,7 @@ bool PdfHandler::ensurePdfToolsAvailable(QString &error) const
 
 bool PdfHandler::convertPdfToHtmlStdout(const QString &pdfPath, QString &htmlOut, QString &error) const
 {
-    QString tool = QStandardPaths::findExecutable(QStringLiteral("pdftohtml"));
-    if (!tool.isEmpty()) {
+    if (const QString tool = QStandardPaths::findExecutable(QStringLiteral("pdftohtml")); !tool.isEmpty()) {
         QProcess p;
         QStringList args;
         args << QStringLiteral("-nodrm") << QStringLiteral("-i") << QStringLiteral("-noframes")
@@ -115,8 +114,8 @@ bool PdfHandler::save(const QString &filePath,
     }
 
     // Простейший рендеринг QTextDocument постранично
-    QRectF pageRect = QRectF(QPointF(0, 0), QSizeF(writer.width(), writer.height()));
-    QTextDocument *doc = document;
+    auto pageRect = QRectF(QPointF(0, 0), QSizeF(writer.width(), writer.height()));
+    auto *doc = document;
     doc->documentLayout()->setPaintDevice(painter.device());
 
     int page = 0;

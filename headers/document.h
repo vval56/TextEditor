@@ -43,7 +43,7 @@ private:
     QString m_filePath;
     QString m_fileName;
     QDateTime m_lastModified;
-    qint64 m_fileSize;
+    qint64 m_fileSize = 0;
     bool m_isNew = true;
 
     QTextDocument *m_doc;
